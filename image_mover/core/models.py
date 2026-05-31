@@ -41,6 +41,10 @@ class DuplicateGroup:
     def to_remove(self) -> list[MediaFile]:
         return [f for f in self.files if f is not self.keeper]
 
+    @property
+    def paths(self) -> list[str]:
+        return [p for f in self.files for p in f.paths]
+
 
 @dataclass
 class ScanSession:
