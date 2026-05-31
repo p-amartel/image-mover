@@ -61,5 +61,5 @@ def test_clear(db):
 def test_is_cached_unchanged(db):
     cache = Cache(db)
     cache.upsert_file(make_file())
-    assert cache.is_cached("/a.jpg", size_bytes=1024, mtime=0.0) is True
-    assert cache.is_cached("/a.jpg", size_bytes=9999, mtime=0.0) is False
+    assert cache.is_cached("/a.jpg", size_bytes=1024) is True
+    assert cache.is_cached("/a.jpg", size_bytes=9999) is False

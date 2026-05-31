@@ -1,6 +1,11 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, UTC
 from image_mover.core.models import MediaFile, DuplicateGroup
+
+
+def _dt(val: str | None) -> datetime | None:
+    """Parse ISO format datetime string, returning None if val is None."""
+    return datetime.fromisoformat(val) if val else None
 
 
 class Cache:
@@ -16,7 +21,7 @@ class Cache:
             merged_dates = {**existing.get("path_dates", {}), **{p: f.file_date.isoformat() for p in f.paths}}
             self._files.update_one(
                 {"_id": f.hash},
-                {"$set": {"paths": merged_paths, "path_dates": merged_dates, "last_seen": datetime.utcnow().isoformat()}},
+                {"$set": {"paths": merged_paths, "path_dates": merged_dates, "last_seen": datetime.now(UTC).isoformat()}},
             )
         else:
             doc = {
@@ -29,9 +34,8 @@ class Cache:
                 "file_date": f.file_date.isoformat(),
                 "canonical_date": f.canonical_date.isoformat(),
                 "extension": f.extension,
-                "last_seen": datetime.utcnow().isoformat(),
+                "last_seen": datetime.now(UTC).isoformat(),
                 "migrated_to": None,
-                "mtime": getattr(f, "_mtime", 0.0),
             }
             self._files.insert_one(doc)
 
@@ -47,8 +51,6 @@ class Cache:
             path_dates = doc.get("path_dates", {})
             members = []
             for p in doc["paths"]:
-                def _dt(val):
-                    return datetime.fromisoformat(val) if val else None
                 fd_str = path_dates.get(p, doc["file_date"])
                 mf = MediaFile(
                     hash=doc["_id"],
@@ -80,7 +82,7 @@ class Cache:
         else:
             self._files.delete_one({"_id": hash})
 
-    def is_cached(self, path: str, size_bytes: int, mtime: float) -> bool:
+    def is_cached(self, path: str, size_bytes: int) -> bool:
         doc = self._files.find_one({"paths": path})
         if not doc:
             return False
@@ -94,9 +96,6 @@ class Cache:
         self._sessions.drop()
 
     def _doc_to_media_file(self, doc: dict) -> MediaFile:
-        def _dt(val):
-            return datetime.fromisoformat(val) if val else None
-
         return MediaFile(
             hash=doc["_id"],
             paths=doc["paths"],
