@@ -1,6 +1,10 @@
+import os
 import pytest
 import mongomock
 from pathlib import Path
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ.setdefault("QT_PLUGIN_PATH", "/opt/anaconda3/lib/python3.13/site-packages/PyQt6/Qt6/plugins")
 
 
 @pytest.fixture
