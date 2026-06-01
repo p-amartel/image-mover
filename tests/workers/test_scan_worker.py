@@ -10,11 +10,14 @@ def make_media_file():
 
 
 def test_scan_worker_emits_progress(qtbot):
+    from pathlib import Path
     worker = ScanWorker(source_dir="/tmp", db=MagicMock())
-    mock_files = [make_media_file(), make_media_file()]
+    mock_paths = [(Path("/a.jpg"), ".jpg"), (Path("/b.jpg"), ".jpg")]
+    mock_file = make_media_file()
 
     with patch("image_mover.ui.workers.scan_worker.Scanner") as MockScanner:
-        MockScanner.return_value.iter_files.return_value = iter(mock_files)
+        MockScanner.return_value.list_paths.return_value = mock_paths
+        MockScanner.return_value.build_media_file.return_value = mock_file
         with patch("image_mover.ui.workers.scan_worker.Cache"):
             signals = []
             worker.progress.connect(lambda n, t: signals.append((n, t)))

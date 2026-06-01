@@ -20,17 +20,27 @@ class Scanner:
         self._exts = {e.lower() for e in allowed_extensions}
         self._cache = cache
 
-    def iter_files(self, directory: Path):
-        for root, _dirs, files in os.walk(directory):
+    def list_paths(self, directory: Path) -> list[tuple[Path, str]]:
+        """Fast first pass: enumerate matching paths without hashing."""
+        result = []
+        for root, _dirs, files in os.walk(directory, followlinks=False):
             for name in files:
                 path = Path(root) / name
                 ext = path.suffix.lower()
-                if ext not in self._exts:
-                    continue
-                try:
-                    yield self._build_media_file(path, ext)
-                except (PermissionError, OSError):
-                    continue
+                if ext in self._exts:
+                    result.append((path, ext))
+        return result
+
+    def iter_files(self, directory: Path):
+        """Yield MediaFile objects one at a time (hashes as it goes)."""
+        for path, ext in self.list_paths(directory):
+            try:
+                yield self._build_media_file(path, ext)
+            except (PermissionError, OSError):
+                continue
+
+    def build_media_file(self, path: Path, ext: str) -> MediaFile:
+        return self._build_media_file(path, ext)
 
     def _build_media_file(self, path: Path, ext: str) -> MediaFile:
         st = path.stat()
@@ -66,6 +76,6 @@ def _extract_exif_date(path: Path) -> datetime | None:
         tag = tags.get("EXIF DateTimeOriginal") or tags.get("Image DateTime")
         if not tag:
             return None
-        return datetime.strptime(str(tag.values), "%Y:%m:%d %H:%M:%S")
+        return datetime.strptime(tag.printable, "%Y:%m:%d %H:%M:%S")
     except Exception:
         return None
