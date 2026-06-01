@@ -29,7 +29,7 @@ class FilesPane(QWidget):
         self._table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self._table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self._table.currentRowChanged.connect(self._on_row_changed)
+        self._table.itemSelectionChanged.connect(self._on_selection_changed)
         layout.addWidget(self._table)
 
     def set_db(self, db):
@@ -66,6 +66,7 @@ class FilesPane(QWidget):
                     if item:
                         item.setBackground(QColor(80, 40, 40))
 
-    def _on_row_changed(self, row: int):
+    def _on_selection_changed(self):
+        row = self._table.currentRow()
         if 0 <= row < len(self._files):
             self.file_selected.emit(self._files[row])
