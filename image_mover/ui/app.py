@@ -1,6 +1,24 @@
+import os
 import sys
-from PyQt6.QtWidgets import QApplication
-from image_mover.ui.main_window import MainWindow
+from pathlib import Path
+
+
+def _ensure_qt_plugins():
+    if os.environ.get("QT_PLUGIN_PATH"):
+        return
+    try:
+        import PyQt6
+        plugin_path = Path(PyQt6.__file__).parent / "Qt6" / "plugins"
+        if plugin_path.exists():
+            os.environ["QT_PLUGIN_PATH"] = str(plugin_path)
+    except Exception:
+        pass
+
+
+_ensure_qt_plugins()
+
+from PyQt6.QtWidgets import QApplication  # noqa: E402
+from image_mover.ui.main_window import MainWindow  # noqa: E402
 
 
 def main():
