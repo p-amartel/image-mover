@@ -36,7 +36,7 @@ class FilesPane(QWidget):
         self._db = db
 
     def load_source(self, source_dir: str):
-        if not self._db or not source_dir:
+        if self._db is None or not source_dir:
             return
         self._current_source = source_dir
         cache = Cache(self._db)

@@ -52,8 +52,8 @@ class MigrateDialog(QDialog):
             self._btn_start.setEnabled(True)
 
     def _start(self):
-        cache = Cache(self._db) if self._db else None
-        all_files = cache.get_all_files() if cache else []
+        cache = Cache(self._db) if self._db is not None else None
+        all_files = cache.get_all_files() if cache is not None else []
         pending = [f for f in all_files if f.migrated_to is None]
 
         images = [f for f in pending if f.media_type == "image"]

@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
         self.resize(1200, 750)
 
         self._db = self._connect_mongo()
-        self._cache = Cache(self._db) if self._db else None
+        self._cache = Cache(self._db) if self._db is not None else None
 
         self._build_toolbar()
         self._build_panes()

@@ -19,8 +19,8 @@ class ConsolidateDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        cache = Cache(db) if db else None
-        groups = cache.get_duplicates() if cache else []
+        cache = Cache(db) if db is not None else None
+        groups = cache.get_duplicates() if cache is not None else []
         files_to_remove = [f for group in groups for f in group.to_remove]
         total_bytes = sum(f.size_bytes for f in files_to_remove)
 
