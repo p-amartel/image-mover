@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 from pathlib import Path
 from PyQt6.QtCore import QThread, pyqtSignal
 
@@ -30,7 +31,6 @@ class MoveWorker(QThread):
                     new_path = org.move(f)
                     cache.mark_migrated(f.hash, new_path)
                 elif self._mode == "consolidate":
-                    import os
                     os.remove(f.primary_path)
                     cache.remove_path(f.hash, f.primary_path)
                 moved += 1
