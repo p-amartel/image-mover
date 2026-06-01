@@ -54,7 +54,7 @@ class ConsolidateDialog(QDialog):
     def _start(self, files: list[MediaFile]):
         self._btn_confirm.setEnabled(False)
         self._progress.setVisible(True)
-        self._worker = MoveWorker(files, destination="", db=self._db, mode="consolidate", parent=self)
+        self._worker = MoveWorker(files, destinations={}, db=self._db, mode="consolidate", parent=self)
         self._worker.progress.connect(lambda n, t: (self._progress.setRange(0, t), self._progress.setValue(n)))
         self._worker.finished.connect(self._on_done)
         self._worker.error_occurred.connect(lambda msg: self._status.setText(msg))

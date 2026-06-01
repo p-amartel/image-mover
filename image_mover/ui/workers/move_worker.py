@@ -13,21 +13,22 @@ class MoveWorker(QThread):
     finished = pyqtSignal(int, int)   # (moved, errors)
     error_occurred = pyqtSignal(str)  # per-file error
 
-    def __init__(self, files: list[MediaFile], destination: str, db, mode: str, parent=None):
+    def __init__(self, files: list[MediaFile], destinations: dict[str, str], db, mode: str, parent=None):
         super().__init__(parent)
         self._files = files
-        self._dest = destination
+        self._destinations = destinations  # {"image": path, "video": path}
         self._db = db
         self._mode = mode  # "migrate" | "consolidate"
 
     def run(self):
         cache = Cache(self._db)
-        org = Organizer(Path(self._dest))
+        organizers = {k: Organizer(Path(v)) for k, v in self._destinations.items()}
         total = len(self._files)
         moved, errors = 0, 0
         for i, f in enumerate(self._files, 1):
             try:
                 if self._mode == "migrate":
+                    org = organizers[f.media_type]
                     new_path = org.move(f)
                     cache.mark_migrated(f.hash, new_path)
                 elif self._mode == "consolidate":

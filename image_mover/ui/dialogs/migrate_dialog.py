@@ -1,7 +1,7 @@
 from __future__ import annotations
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QProgressBar,
-    QPushButton, QFileDialog, QHBoxLayout
+    QPushButton, QFileDialog, QHBoxLayout, QFrame
 )
 
 from image_mover.core.cache import Cache
@@ -12,19 +12,42 @@ class MigrateDialog(QDialog):
     def __init__(self, db, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Migrate Files")
-        self.setMinimumWidth(420)
+        self.setMinimumWidth(460)
         self._db = db
-        self._dest: str | None = None
+        self._img_dest: str | None = None
+        self._vid_dest: str | None = None
         self._worker = None
 
         layout = QVBoxLayout(self)
+        layout.setSpacing(8)
 
-        self._dest_label = QLabel("No destination selected")
-        layout.addWidget(self._dest_label)
+        # Images destination
+        layout.addWidget(QLabel("Images destination:"))
+        img_row = QHBoxLayout()
+        self._img_label = QLabel("Not selected")
+        self._img_label.setStyleSheet("color: grey;")
+        img_row.addWidget(self._img_label, stretch=1)
+        btn_img = QPushButton("Choose…")
+        btn_img.clicked.connect(self._pick_img_dest)
+        img_row.addWidget(btn_img)
+        layout.addLayout(img_row)
 
-        btn_pick = QPushButton("Choose destination…")
-        btn_pick.clicked.connect(self._pick_dest)
-        layout.addWidget(btn_pick)
+        # Videos destination
+        layout.addWidget(QLabel("Videos destination:"))
+        vid_row = QHBoxLayout()
+        self._vid_label = QLabel("Not selected")
+        self._vid_label.setStyleSheet("color: grey;")
+        vid_row.addWidget(self._vid_label, stretch=1)
+        btn_vid = QPushButton("Choose…")
+        btn_vid.clicked.connect(self._pick_vid_dest)
+        vid_row.addWidget(btn_vid)
+        layout.addLayout(vid_row)
+
+        # Separator
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setFrameShadow(QFrame.Shadow.Sunken)
+        layout.addWidget(line)
 
         self._progress = QProgressBar()
         self._progress.setVisible(False)
@@ -44,12 +67,26 @@ class MigrateDialog(QDialog):
         btn_row.addWidget(self._btn_start)
         layout.addLayout(btn_row)
 
-    def _pick_dest(self):
-        path = QFileDialog.getExistingDirectory(self, "Select destination")
+    def _pick_img_dest(self):
+        path = QFileDialog.getExistingDirectory(self, "Select images destination")
         if path:
-            self._dest = path
-            self._dest_label.setText(path)
-            self._btn_start.setEnabled(True)
+            self._img_dest = path
+            self._img_label.setText(path)
+            self._img_label.setStyleSheet("")
+            self._update_start_button()
+
+    def _pick_vid_dest(self):
+        path = QFileDialog.getExistingDirectory(self, "Select videos destination")
+        if path:
+            self._vid_dest = path
+            self._vid_label.setText(path)
+            self._vid_label.setStyleSheet("")
+            self._update_start_button()
+
+    def _update_start_button(self):
+        self._btn_start.setEnabled(
+            self._img_dest is not None and self._vid_dest is not None
+        )
 
     def _start(self):
         cache = Cache(self._db) if self._db is not None else None
@@ -63,7 +100,9 @@ class MigrateDialog(QDialog):
         self._btn_start.setEnabled(False)
         self._progress.setVisible(True)
         self._progress.setRange(0, len(ordered))
-        self._worker = MoveWorker(ordered, self._dest, self._db, mode="migrate", parent=self)
+
+        destinations = {"image": self._img_dest, "video": self._vid_dest}
+        self._worker = MoveWorker(ordered, destinations, self._db, mode="migrate", parent=self)
         self._worker.progress.connect(lambda n, t: self._progress.setValue(n))
         self._worker.finished.connect(self._on_done)
         self._worker.error_occurred.connect(lambda msg: self._status.setText(msg))
