@@ -72,9 +72,11 @@ class ScanDialog(QDialog):
         self._status.setText(f"Done: {scanned} files, {new} new, {dupes} duplicate groups")
         self._progress.setVisible(False)
         self._btn_start.setEnabled(True)
+        self._worker.deleteLater()
         self.scan_complete.emit(self._selected_dir)
 
     def _on_error(self, msg: str):
         self._status.setText(f"Error: {msg}")
         self._progress.setVisible(False)
         self._btn_start.setEnabled(True)
+        self._worker.deleteLater()

@@ -43,6 +43,10 @@ class Cache:
         doc = self._files.find_one({"_id": hash})
         return self._doc_to_media_file(doc) if doc else None
 
+    def get_file_by_path(self, path: str) -> "MediaFile | None":
+        doc = self._files.find_one({"paths": path})
+        return self._doc_to_media_file(doc) if doc else None
+
     def get_duplicates(self) -> list[DuplicateGroup]:
         groups = []
         for doc in self._files.find():

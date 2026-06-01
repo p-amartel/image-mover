@@ -41,7 +41,7 @@ class Scanner:
         media_type = "image" if ext in IMAGE_EXTS else "video"
 
         if self._cache and self._cache.is_cached(str(path), size):
-            cached = self._cache.get_file_by_hash_for_path(str(path))
+            cached = self._cache.get_file_by_path(str(path))
             if cached:
                 return cached
 

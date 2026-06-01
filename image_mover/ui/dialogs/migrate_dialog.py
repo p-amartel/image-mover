@@ -72,3 +72,4 @@ class MigrateDialog(QDialog):
     def _on_done(self, moved: int, errors: int):
         self._status.setText(f"Migrated {moved} files. {errors} errors.")
         self._progress.setVisible(False)
+        self._worker.deleteLater()

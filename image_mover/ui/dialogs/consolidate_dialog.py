@@ -36,14 +36,19 @@ class ConsolidateDialog(QDialog):
         layout.addWidget(self._status)
 
         btn_row = QHBoxLayout()
-        btn_cancel = QPushButton("Cancel")
-        btn_cancel.clicked.connect(self.reject)
-        btn_row.addWidget(btn_cancel)
+        self._btn_cancel = QPushButton("Cancel")
+        self._btn_cancel.clicked.connect(self.reject)
+        btn_row.addWidget(self._btn_cancel)
 
         self._btn_confirm = QPushButton("Remove duplicates")
         self._btn_confirm.setEnabled(bool(files_to_remove))
         self._btn_confirm.clicked.connect(lambda: self._start(files_to_remove))
         btn_row.addWidget(self._btn_confirm)
+
+        self._btn_done = QPushButton("Done")
+        self._btn_done.setVisible(False)
+        self._btn_done.clicked.connect(self.accept)
+        btn_row.addWidget(self._btn_done)
         layout.addLayout(btn_row)
 
     def _start(self, files: list[MediaFile]):
@@ -58,3 +63,6 @@ class ConsolidateDialog(QDialog):
     def _on_done(self, moved: int, errors: int):
         self._status.setText(f"Removed {moved} files. {errors} errors.")
         self._progress.setVisible(False)
+        self._worker.deleteLater()
+        self._btn_cancel.setVisible(False)
+        self._btn_done.setVisible(True)

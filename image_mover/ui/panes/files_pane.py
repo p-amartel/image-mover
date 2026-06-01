@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
     QLabel, QHeaderView, QAbstractItemView
@@ -40,7 +41,7 @@ class FilesPane(QWidget):
         self._current_source = source_dir
         cache = Cache(self._db)
         all_files = cache.get_all_files()
-        self._files = [f for f in all_files if any(p.startswith(source_dir) for p in f.paths)]
+        self._files = [f for f in all_files if any(Path(p).is_relative_to(Path(source_dir)) for p in f.paths)]
         self._populate()
 
     def refresh(self):

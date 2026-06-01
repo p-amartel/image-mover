@@ -39,7 +39,8 @@ class DuplicateGroup:
 
     @property
     def to_remove(self) -> list[MediaFile]:
-        return [f for f in self.files if f is not self.keeper]
+        keeper = self.keeper
+        return [f for f in self.files if f is not keeper]
 
     @property
     def paths(self) -> list[str]:

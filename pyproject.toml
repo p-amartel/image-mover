@@ -10,7 +10,6 @@ dependencies = [
     "PyQt6>=6.6",
     "pymongo>=4.6",
     "exifread>=3.0",
-    "pymediainfo>=6.1",
 ]
 
 [project.scripts]
